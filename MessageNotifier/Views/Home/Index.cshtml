@@ -1,0 +1,192 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@{
+    var Users = ViewBag.Users;
+    var Contacts = ViewBag.Contacts;
+    var ContactsInfo = ViewBag.ContactInfo;
+
+    var StatusTable = (List<Dictionary<string, string>>)TempData["StatusTable"];
+
+}
+
+@if (TempData["Status"] != null)
+{
+    var status = (Dictionary<string, string>)TempData["Status"];
+    string type = status["type"];
+    string message = status["message"];
+
+    <div id="alert" class="alert alert-@type alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">@type!</h4>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <p>@message</p>
+    </div>
+}
+
+
+<div class="container mt-4">
+    <h1>I want to send message...</h1>
+    <div class="col-xs-12">
+        @using (Html.BeginForm("Send", "Home", FormMethod.Post, new { id = "send-message" }))
+        {
+
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" name="Title" value="" placeholder="Sample title" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea name="Content" class="form-control" placeholder="Sample message text"></textarea>
+            </div>
+
+
+            <input type="submit" name="submit" value="Send message" class="btn btn-lg btn-success" />
+        }
+    </div>
+</div>
+
+<div class="container">
+    <h1>...to that users</h1>
+    <div class="col-xs-12">
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">Add user</button>
+    </div>
+    <br />
+    @if (Users?.Count > 0)
+    {
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Available contacts</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (var user in Users)
+                    {
+                        <tr>
+                            <td>@user.Name</td>
+                            <td>@user.LastName</td>
+                            <td>
+                                <div class="row">
+                                    @{
+                                        if (user.Contacts != null)
+                                        {
+                                            <ul>
+                                                @foreach (var contact in user.Contacts)
+                                                {
+
+                                                    <li>
+                                                        <strong>@contact.ContactInfo.Title</strong>  @contact.Value
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-xs-6">
+                                                <p class="text-danger">No contacts found</p>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="...">
+                                    @Html.ActionLink("Remove", "Remove", new { id = user.Id }, new { @class = "btn btn-small btn-danger" })
+                                    @Html.ActionLink("Edit", "Edit", new { id = user.Id }, new { @class = "btn btn-small btn-info" })
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <h3>
+            No users found. <a class="btn-link" data-toggle="modal" data-target="#myModal">Create new one?</a>
+        </h3>
+    }
+</div>
+
+@if (StatusTable != null && StatusTable.Count > 0)
+{
+    <details open>
+        <summary>Sending status</summary>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            @foreach (var item in StatusTable)
+            {
+                var statusClass = item["status"] == "success" ? "success" : "danger";
+                <tr class="table-@statusClass">
+                    <td>@item["user"]</td>
+                    <td>@item["service"]</td>
+                    <td>@item["status"]</td>
+                </tr>
+            }
+        </table>
+    </details>
+}
+
+<div id="myModal" class="modal fade" tabindex="-1" role="dialog">
+
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("New", "Home", FormMethod.Post, new { id = "user-submit" }))
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title">Add user</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="title">Name</label>
+                        <input type="text" name="Name" value="" placeholder="John" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Last name</label>
+                        <input type="text" name="LastName" value="" placeholder="Smith" class="form-control" />
+                    </div>
+                    <hr />
+                    <h5>Contacts</h5>
+                    @foreach (var info in ContactsInfo)
+                    {
+                        var title = info.Title;
+                        var description = info.Description;
+                        var type = info.Type;
+                        var pattern = info.Pattern[title];
+
+                        <div class="form-group">
+                            <label for="title">@title</label>
+                            <input type="@type" id="contact-@title" name="contact-@title" data-inputmask="@pattern" placeholder="@description" class="form-control" />
+                        </div>
+                    }
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save and add one more</button>
+                    <input type="submit" class="btn btn-success" value="Save" />
+                </div>
+            }
+        </div>
+
+    </div>
+
+
+</div>
+

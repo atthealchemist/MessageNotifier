@@ -1,0 +1,88 @@
+﻿@using MessageNotifierLibrary.Models
+
+@{
+    var Contacts = (List<ContactInfo>)ViewData["ContactInfo"];
+}
+
+<div class="container">
+
+    @if (Contacts.Count > 0)
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var info in Contacts)
+                {
+
+                    <tr>
+                        <td>@info.Type</td>
+                        <td>@info.Title</td>
+                        <td>@info.Description</td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="...">
+                                @Html.ActionLink("Remove", "Remove", new { id = info.Id }, new { @class = "btn btn-small btn-danger" })
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div>
+            <h2>No contacts found</h2>
+        </div>
+    }
+
+</div>
+
+<div class="container">
+    <div class="row">
+        @using (Html.BeginForm("Add", "Contact", FormMethod.Post, new { id = "add-contact", @class = "form-inline" }))
+        {
+            <div class="col-sm-3 my-1">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input name="Title" type="text" class="form-control" id="title" placeholder="AIM">
+                </div>
+            </div>
+            <div class="col-sm-3 my-1">
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input name="Description" type="text" class="form-control" id="description" placeholder="AIM Identifier">
+                </div>
+            </div>
+            <div class="col-sm-2 my-1">
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <select name="Type" class="custom-select mr-sm-2" id="type">
+                        @{
+                            var values = (int[])Enum.GetValues(typeof(ContactType));
+                            foreach (int info in values)
+                            {
+                                var idx = info;
+                                if (idx > 0)
+                                {
+                                    <option value="@idx">@Enum.GetNames(typeof(ContactType))[idx]</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <input type="submit" class="btn btn-primary mt-4" value="Add">
+                </div>
+            </div>
+        }
+    </div>
+</div>
